@@ -9,4 +9,5 @@ def covid_df():
     covid_dataframe['Sexo'].fillna('NAO ENCONTRADO', inplace=True)
     covid_dataframe['FaixaEtaria'].fillna('NAO ENCONTRADO', inplace=True)
 
+
     return covid_dataframe

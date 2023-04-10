@@ -36,39 +36,24 @@ def createtable(tablename, collumnincsv, collumnname):
         except Error as e:
             print("Error while connecting to MySQL", e)
 
-def createtableComorbidade(tablename, collumnname):
+
+def createtableComorbidade():
+    indexTable = 0
     cursor = connection.cursor()
     if connection:
         try:
-            cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
-            result = cursor.fetchone()
-            if result:
-                drop_table = f"""DROP TABLE {tablename};"""
-                cursor.execute(drop_table)
-                connection.commit()
-                print(f'Tabela {tablename} dropada com sucesso!')
-
-            create_table = f"""CREATE TABLE {tablename} (
-                                                id INT AUTO_INCREMENT PRIMARY KEY,
-                                                {collumnname} VARCHAR(255) NOT NULL
-                                                ) """
-            cursor.execute(create_table)
-            print(f"Tabela {tablename} criada com sucesso ")
-
-            list1 = []
-            for index, row in dataframe_covid.loc[:,'ComorbidadePulmao':'ComorbidadeObesidade'].iterrows():
+            for index, row in dataframe_covid.loc[:, 'ComorbidadePulmao':'ComorbidadeObesidade'].iterrows():
+                indexTable = indexTable + 1
+                print(indexTable)
                 if 'Sim' in row.values:
-                    list1.append('Sim')
+                    query = f"UPDATE covidbigtable SET Comorbidade = 'Sim' WHERE id={indexTable}"
+                    cursor.execute(query)
+                    connection.commit()
                 else:
-                    list1.append('Não')
-
-            dfresult = list1
-            for df in dfresult:
-                query = f"INSERT INTO {tablename} ({collumnname}) VALUES (%s)"
-                values = (df,)
-                cursor.execute(query, values)
-
-            connection.commit()
-            print(f"\n{len(dfresult)} registros inseridos na tabela '{tablename}'.\n")
+                    query = f"UPDATE covidbigtable SET Comorbidade = 'Não' WHERE id={indexTable}"
+                    cursor.execute(query)
+                    connection.commit()
+                if index % 1000 == 0:
+                    print('Comitou')
         except Error as e:
             print("Error while connecting to MySQL", e)
