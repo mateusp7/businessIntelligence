@@ -4,10 +4,10 @@ from mysql.connector import Error
 
 connection = conectar()
 dataframe_covid = covid_df()
+cursor = connection.cursor()
 
 
-def createtable(tablename, collumnincsv, collumnname):
-    cursor = connection.cursor()
+def createUniqueDimmensionTable(tablename, collumnincsv, collumnname):
     if connection:
         try:
             cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
@@ -37,23 +37,30 @@ def createtable(tablename, collumnincsv, collumnname):
             print("Error while connecting to MySQL", e)
 
 
-def createtableComorbidade():
-    indexTable = 0
-    cursor = connection.cursor()
+def createComorbidadeDimmensionTable(tablename, collumnname):
     if connection:
         try:
-            for index, row in dataframe_covid.loc[:, 'ComorbidadePulmao':'ComorbidadeObesidade'].iterrows():
-                indexTable = indexTable + 1
-                print(indexTable)
-                if 'Sim' in row.values:
-                    query = f"UPDATE covidbigtable SET Comorbidade = 'Sim' WHERE id={indexTable}"
-                    cursor.execute(query)
-                    connection.commit()
-                else:
-                    query = f"UPDATE covidbigtable SET Comorbidade = 'Não' WHERE id={indexTable}"
-                    cursor.execute(query)
-                    connection.commit()
-                if index % 1000 == 0:
-                    print('Comitou')
+            cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
+            result = cursor.fetchone()
+            if result:
+                drop_table = f"""DROP TABLE {tablename};"""
+                cursor.execute(drop_table)
+                connection.commit()
+                print(f'Tabela {tablename} dropada com sucesso!')
+
+            create_table = f"""CREATE TABLE {tablename} (
+                                                id INT AUTO_INCREMENT PRIMARY KEY,
+                                                {collumnname} VARCHAR(255) NOT NULL
+                                                ) """
+            cursor.execute(create_table)
+            connection.commit()
+            print(f"Tabela {tablename} criada com sucesso ")
+
+            for df in ["Sim", "Não"]:
+                query = f"INSERT INTO {tablename} ({collumnname}) VALUES (%s)"
+                values = (df,)
+                cursor.execute(query, values)
+            connection.commit()
+            print(f"Registros inseridos na tabela '{tablename}'.\n")
         except Error as e:
             print("Error while connecting to MySQL", e)
