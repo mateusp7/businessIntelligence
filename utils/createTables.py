@@ -82,3 +82,45 @@ def createComorbidadeDimmensionTable(connection, tablename, collumnname):
             cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
+
+
+def createFactTable(connection):
+    if connection:
+        try:
+            cursor = connection.cursor()
+            cursor.execute(f"SHOW TABLES LIKE 'fatomortes'")
+            result = cursor.fetchone()
+            if result:
+                drop_table = f"""DROP TABLE fatomortes;"""
+                cursor.execute(drop_table)
+                connection.commit()
+                print(f'\nTabela fatomortes dropada com sucesso!')
+
+            create_table = f"""CREATE TABLE fatomortes (
+                                                idFatoMortes INT AUTO_INCREMENT PRIMARY KEY,
+                                                MortesPorMunicipio INT NOT NULL,
+                                                Municipio VARCHAR(100) NOT NULL,
+                                                idMunicipio INT NOT NULL DEFAULT 0
+                                                ) """
+            cursor.execute(create_table)
+            print(f"\nTabela fatomortes criada com sucesso.\n")
+
+            cursor.execute("SHOW TABLES LIKE 'fatomortes'")
+            isTableExist = cursor.fetchone()
+            if isTableExist:
+                queryCreateCollumnAndInsertValues = f"""INSERT INTO fatomortes (Municipio, MortesPorMunicipio) SELECT 
+                municipiolocalidade.municipio, COUNT(*) as MortesMunicipio FROM covidbigtable JOIN 
+                municipiolocalidade ON covidbigtable.Municipio = municipiolocalidade.id GROUP BY 
+                municipiolocalidade.municipio;"""
+
+                cursor.execute(queryCreateCollumnAndInsertValues)
+
+                queryUpdateValuesInIDMunicipios = """UPDATE fatomortes 
+                INNER JOIN municipiolocalidade ON fatomortes.Municipio = municipiolocalidade.municipio 
+                SET fatomortes.idMunicipio = municipiolocalidade.id"""
+
+                cursor.execute(queryUpdateValuesInIDMunicipios)
+                connection.commit()
+                print('Dados inseridos na tabela com sucesso')
+        except Error as e:
+            print("Error while connecting to MySQL", e)

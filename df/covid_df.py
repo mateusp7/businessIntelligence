@@ -2,7 +2,8 @@ import pandas as pd
 
 
 def covid_df():
-    covid_dataframe = pd.read_csv("microdados.csv", sep=";", encoding="latin-1", on_bad_lines='skip',
+    covid_dataframe = pd.read_csv(r"C:\Users\admte\Downloads\MICRODADOS.csv", sep=";", encoding="latin-1",
+                                  on_bad_lines='skip',
                                   usecols=['DataObito', 'FaixaEtaria', 'Municipio', 'Bairro', 'Sexo', 'ComorbidadePulmao', 'ComorbidadeCardio', 'ComorbidadeRenal', 'ComorbidadeDiabetes', 'ComorbidadeTabagismo', 'ComorbidadeObesidade'])\
                                 .dropna(subset=["DataObito"])
     covid_dataframe['Bairro'].fillna('NAO ENCONTRADO', inplace=True)
