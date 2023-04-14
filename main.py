@@ -58,11 +58,14 @@ def run():
                                         collumnincsv="Sexo")
             createUniqueDimmensionTable(connection=connection, tablename="faixaEtaria", collumnname="faixaEtaria",
                                         collumnincsv="FaixaEtaria")
+            createUniqueDimmensionTable(connection=connection, tablename="tempo", collumnname="tempo",
+                                        collumnincsv="DataObito")
             createComorbidadeDimmensionTable(connection=connection, tablename="comorbidade", collumnname="comorbidade")
+
             insertComorbidadeInBigTable(connection=connection)
 
-            # updateBigTable(connection=connection, tableforjoin="comorbidade", collumnincovidbigtable="Comorbidade",
-            #                collumnintableforjoin="comorbidade")
+            updateBigTable(connection=connection, tableforjoin="comorbidade", collumnincovidbigtable="Comorbidade",
+                           collumnintableforjoin="comorbidade")
             updateBigTable(connection=connection, tableforjoin="genero", collumnincovidbigtable="Sexo",
                            collumnintableforjoin="genero")
             updateBigTable(connection=connection, tableforjoin="faixaetaria", collumnincovidbigtable="FaixaEtaria",
