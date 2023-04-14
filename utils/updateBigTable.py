@@ -1,13 +1,10 @@
-from connection_data_base.connection_data_base import conectar
 from mysql.connector import Error
 
-connection = conectar()
-cursor = connection.cursor()
 
-
-def updateBigTable(tableforjoin, collumnincovidbigtable, collumnintableforjoin):
+def updateBigTable(connection, tableforjoin, collumnincovidbigtable, collumnintableforjoin):
     if connection:
         try:
+            cursor = connection.cursor()
             timewait = "SET innodb_lock_wait_timeout = 10"
             cursor.execute(timewait)
 
@@ -18,7 +15,8 @@ def updateBigTable(tableforjoin, collumnincovidbigtable, collumnintableforjoin):
                      f"{tableforjoin}.{collumnintableforjoin} SET covidbigtable.{collumnincovidbigtable} = {tableforjoin}.id")
             cursor.execute(query)
 
-            print(f"Dados atualizados de {tableforjoin} para a covidbigtable")
             connection.commit()
+            print(f"Dados atualizados de {tableforjoin} para a covidbigtable")
+            cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)

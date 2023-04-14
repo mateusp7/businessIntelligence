@@ -1,15 +1,13 @@
-from connection_data_base.connection_data_base import conectar
 from df.covid_df import covid_df
 from mysql.connector import Error
 
-connection = conectar()
 dataframe_covid = covid_df()
-cursor = connection.cursor()
 
 
-def createUniqueDimmensionTable(tablename, collumnincsv, collumnname):
+def createUniqueDimmensionTable(connection, tablename, collumnincsv, collumnname):
     if connection:
         try:
+            cursor = connection.cursor()
             cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
             result = cursor.fetchone()
             if result:
@@ -31,15 +29,16 @@ def createUniqueDimmensionTable(tablename, collumnincsv, collumnname):
                 values = (df,)
                 cursor.execute(query, values)
 
-            connection.commit()
             print(f"\n{len(dfresult)} registros inseridos na tabela '{tablename}'.\n")
+            cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
 
 
-def createComorbidadeDimmensionTable(tablename, collumnname):
+def createComorbidadeDimmensionTable(connection, tablename, collumnname):
     if connection:
         try:
+            cursor = connection.cursor()
             cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
             result = cursor.fetchone()
             if result:
@@ -62,5 +61,6 @@ def createComorbidadeDimmensionTable(tablename, collumnname):
                 cursor.execute(query, values)
             connection.commit()
             print(f"Registros inseridos na tabela '{tablename}'.\n")
+            cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)

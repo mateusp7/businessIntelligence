@@ -1,16 +1,13 @@
-from connection_data_base.connection_data_base import conectar
 from df.covid_df import covid_df
 from mysql.connector import Error
 
-connection = conectar()
 dataframe_covid = covid_df()
 
 
-def createBigWithMultiplesCollumns(tablename, column_names):
-    cursor = connection.cursor()
+def createBigWithMultiplesCollumns(connection, tablename, column_names):
     if connection:
         try:
-
+            cursor = connection.cursor()
             cursor.execute(f"SHOW TABLES LIKE '{tablename}'")
             result = cursor.fetchone()
             if result:
@@ -40,16 +37,16 @@ def createBigWithMultiplesCollumns(tablename, column_names):
 
             connection.commit()
             print('Dados inseridos na tabela covidbigtable')
-
+            cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
 
 
-def insertComorbidadeInBigTable():
-    indexTable = 0
-    cursor = connection.cursor()
+def insertComorbidadeInBigTable(connection):
     if connection:
         try:
+            indexTable = 0
+            cursor = connection.cursor()
             for index, row in dataframe_covid.loc[:, 'ComorbidadePulmao':'ComorbidadeObesidade'].iterrows():
                 indexTable = indexTable + 1
 
@@ -61,5 +58,6 @@ def insertComorbidadeInBigTable():
                     cursor.execute(query)
                 if indexTable % 1000 == 0:
                     connection.commit()
+            cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
