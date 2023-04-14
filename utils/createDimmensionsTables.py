@@ -28,9 +28,9 @@ def createUniqueDimmensionTable(connection, tablename, collumnincsv, collumnname
 
                 dfresult = dataframe_covid[f"{collumnincsv}"].drop_duplicates().tolist()
                 for df in dfresult:
-                    dia, mes, ano = df.split('-')
-                    query = f"INSERT INTO {tablename} (dia, mes, ano) VALUES (%s, %s, %s)"
-                    values = (dia, mes, ano)
+                    ano, mes, dia = df.split('-')
+                    query = f"INSERT INTO {tablename} (ano, mes, dia) VALUES (%s, %s, %s)"
+                    values = (ano, mes, dia)
                     cursor.execute(query, values)
                 connection.commit()
                 print(f"\n{len(dfresult)} registros inseridos na tabela '{tablename}'.\n")
