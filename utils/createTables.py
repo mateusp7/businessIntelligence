@@ -100,7 +100,8 @@ def createFactTable(connection):
                                                 idFatoMortes INT AUTO_INCREMENT PRIMARY KEY,
                                                 TotalMortes INT NOT NULL,
                                                 MunicipioID INT NOT NULL,
-                                                FaixaEtariaID INT NOT NULL
+                                                FaixaEtariaID INT NOT NULL,
+                                                ComorbidadeID INT NOT NULL
                                                 ) """
             cursor.execute(create_table)
             print(f"\nTabela fatomortes criada com sucesso.\n")
@@ -109,12 +110,13 @@ def createFactTable(connection):
             isTableExist = cursor.fetchone()
             if isTableExist:
                 query = """
-                INSERT INTO fatomortes (MunicipioID, FaixaEtariaID, TotalMortes)
-                SELECT municipiolocalidade.id as MunicipioID, faixaetaria.id as FaixaEtariaID, COUNT(*) as TotalMortes
+                INSERT INTO fatomortes (MunicipioID, FaixaEtariaID, ComorbidadeID, TotalMortes)
+                SELECT municipiolocalidade.id as MunicipioID, faixaetaria.id as FaixaEtariaID, comorbidade.id as ComorbidadeID, COUNT(*) as TotalMortes
                 FROM covidbigtable
                 JOIN municipiolocalidade ON covidbigtable.Municipio = municipiolocalidade.id
                 JOIN faixaetaria ON covidbigtable.FaixaEtaria = faixaetaria.id
-                GROUP BY municipiolocalidade.id, faixaetaria.id;
+                JOIN comorbidade ON covidbigtable.Comorbidade = comorbidade.id
+                GROUP BY municipiolocalidade.id, faixaetaria.id, comorbidade.id;
                 """
                 cursor.execute(query)
                 connection.commit()
