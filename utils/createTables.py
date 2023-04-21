@@ -98,9 +98,9 @@ def createFactTable(connection):
 
             create_table = f"""CREATE TABLE fatomortes (
                                                 idFatoMortes INT AUTO_INCREMENT PRIMARY KEY,
-                                                MortesPorMunicipio INT NOT NULL,
-                                                Municipio VARCHAR(100) NOT NULL,
-                                                idMunicipio INT NOT NULL DEFAULT 0
+                                                TotalMortes INT NOT NULL,
+                                                MunicipioID INT NOT NULL,
+                                                FaixaEtariaID INT NOT NULL
                                                 ) """
             cursor.execute(create_table)
             print(f"\nTabela fatomortes criada com sucesso.\n")
@@ -108,18 +108,15 @@ def createFactTable(connection):
             cursor.execute("SHOW TABLES LIKE 'fatomortes'")
             isTableExist = cursor.fetchone()
             if isTableExist:
-                queryCreateCollumnAndInsertValues = f"""INSERT INTO fatomortes (Municipio, MortesPorMunicipio) SELECT 
-                municipiolocalidade.municipio, COUNT(*) as MortesMunicipio FROM covidbigtable JOIN 
-                municipiolocalidade ON covidbigtable.Municipio = municipiolocalidade.id GROUP BY 
-                municipiolocalidade.municipio;"""
-
-                cursor.execute(queryCreateCollumnAndInsertValues)
-
-                queryUpdateValuesInIDMunicipios = """UPDATE fatomortes 
-                INNER JOIN municipiolocalidade ON fatomortes.Municipio = municipiolocalidade.municipio 
-                SET fatomortes.idMunicipio = municipiolocalidade.id"""
-
-                cursor.execute(queryUpdateValuesInIDMunicipios)
+                query = """
+                INSERT INTO fatomortes (MunicipioID, FaixaEtariaID, TotalMortes)
+                SELECT municipiolocalidade.id as MunicipioID, faixaetaria.id as FaixaEtariaID, COUNT(*) as TotalMortes
+                FROM covidbigtable
+                JOIN municipiolocalidade ON covidbigtable.Municipio = municipiolocalidade.id
+                JOIN faixaetaria ON covidbigtable.FaixaEtaria = faixaetaria.id
+                GROUP BY municipiolocalidade.id, faixaetaria.id;
+                """
+                cursor.execute(query)
                 connection.commit()
                 print('Dados inseridos na tabela com sucesso')
         except Error as e:
